@@ -1,0 +1,35 @@
+---
+layout:     post
+title:      "iOS备忘录3-图片处理"
+subtitle:   "在本文中只记录在实际应用中图片处理的简单使用，做以备忘。"
+date:       2017-06-15
+author:     "minsol"
+header-img: "img/post-bg-universe.jpg"
+catalog: true
+tags:
+    - 备忘录
+---
+
+
+### 前言
+在本文中只记录在实际应用中图片处理的简单使用，做以备忘。
+
+```swift
+/**
+     获取图片中的像素颜色值
+     - parameter pos: 图片中的位置
+     - returns: 颜色值
+     */
+    func getPixelColor(pos:CGPoint)->(UIColor){
+        let pixelData=self.cgImage!.dataProvider!.data
+        let data:UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+        let pixelInfo: Int = ((Int(self.size.width) * Int(pos.y)) + Int(pos.x)) * 4
+        
+        let r = CGFloat(data[pixelInfo]) / CGFloat(255.0)
+        let g = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
+        let b = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
+        let a = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
+    
+        return UIColor(colorLiteralRed: Float(r), green: Float(g), blue: Float(b), alpha: Float(a))
+    }
+```
