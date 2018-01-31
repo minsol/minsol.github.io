@@ -27,32 +27,19 @@ body.parentNode.style.overflow = body.style.overflow = 'hidden';
 </script>
 <iframe src="4oie.html" frameborder="0" scrolling="no" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0; z-index: 99999;"></iframe>
 <![endif]-->
-<!-- <header class="header">
-	<div class="boundary clearfix">
-		<h1 class="header__logo">
-			<span class="header__logo__fullname">罗礼权</span><span class="header__logo__jobtitle">高级前端开发工程师</span>
-		</h1>
-		<address class="header__address">
-			<ul class="clearfix">
-				<li id="header__address__item-phone" class="header__address__item header__address__item-phone" style="display: none;"><script>
-					if (window.atob) { document.write( window.atob('MTM1NjAzMjgxMDY=') ); }
-					if ( /[?&]show-mobile-no=true(&|$)/.test(window.location.search) ) {
-						document.getElementById('header__address__item-phone').style.display = '';
-					}
-				</script>13560328106</li>
-				<li class="header__address__item header__address__item-qq"><script>
-					document.write( 'a4b1c2d9e4f6g8h7i'.replace(/\D/g, '') );
-				</script>41294687</li>
-				<li class="header__address__item header__address__item-email"><script>
-					document.write( ['com', '126', 'heeroluo'].reverse().join('.').replace('.', '@') );
-				</script>heeroluo@126.com</li>
-				<li class="header__address__item header__address__item-blog">
-					<a class="button" href="http://heeroluo.net/" target="_blank">个人博客</a>
-				</li>
-			</ul>
-		</address>
-	</div>
-</header> -->
+<!-- Page Header -->
+<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="site-heading" id="tag-heading">
+                    <h1>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</h1>
+                    <span class="subheading">{{ page.description }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
 
 <div class="main">
 	<section class="section">
