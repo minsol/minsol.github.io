@@ -5,9 +5,82 @@
     <description>hello</description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 01 Feb 2018 11:48:20 +0800</pubDate>
-    <lastBuildDate>Thu, 01 Feb 2018 11:48:20 +0800</lastBuildDate>
+    <pubDate>Wed, 07 Feb 2018 14:01:18 +0800</pubDate>
+    <lastBuildDate>Wed, 07 Feb 2018 14:01:18 +0800</lastBuildDate>
     <generator>Jekyll v3.7.2</generator>
+    
+      <item>
+        <title>iOS使用Workspace来管理自己的项目和Framework</title>
+        <description>&lt;h3 id=&quot;前言&quot;&gt;前言&lt;/h3&gt;
+&lt;p&gt;本文记录在实际开发中使用Workspace来管理自己的项目和Framework
+&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/framework.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;概念&quot;&gt;概念&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Framework是资源的集合，将静态库和其头文件包含到一个结构中:.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。&lt;code class=&quot;highlighter-rouge&quot;&gt;.a + .h + sourceFile = .framework。&lt;/code&gt;&lt;/li&gt;
+    &lt;li&gt;静态库：链接时，静态库会被完整地复制到可执行文件中，被多次使用就有多份冗余拷贝&lt;/li&gt;
+    &lt;li&gt;动态库：链接时不复制，程序运行时由系统动态加载到内存，供程序调用，系统只加载一次，多个程序共用，节省内存&lt;/li&gt;
+    &lt;li&gt;注意理解：无论是.a静态库还.framework静态库，我们需要的都是二进制文件+.h+其它资源文件的形式，不同的是，.a本身就是二进制文件，需要我们自己配上.h和其它文件才能使用，而.framework本身已经包含了.h和其它文件，可以直接使用。&lt;/li&gt;
+    &lt;li&gt;图片资源的处理：两种静态库，一般都是把图片文件单独的放在一个.bundle文件中，一般.bundle的名字和.a或.framework的名字相同。.bundle文件很好弄，新建一个文件夹，把它改名为.bundle就可以了，右键，显示包内容可以向其中添加图片资源。&lt;/li&gt;
+    &lt;li&gt;category是我们实际开发项目中经常用到的，把category打成静态库是没有问题的，但是在用这个静态库的工程中，调用category中的方法时会有找不到该方法的运行时错误（selector not recognized），解决办法是：在使用静态库的工程中配置other linker flags的值为-ObjC。&lt;/li&gt;
+    &lt;li&gt;如果一个静态库很复杂，需要暴露的.h比较多的话，就可以在静态库的内部创建一个.h文件（一般这个.h文件的名字和静态库的名字相同），然后把所有需要暴露出来的.h文件都集中放在这个.h文件中，而那些原本需要暴露的.h都不需要再暴露了，只需要把.h暴露出来就可以了。&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;一准备工作&quot;&gt;一：准备工作&lt;/h3&gt;
+&lt;h4 id=&quot;1创建一个工作空间&quot;&gt;1.创建一个工作空间。&lt;/h4&gt;
+&lt;p&gt;File-&amp;gt;New-&amp;gt;Workspace,命名为workPlace,存放在文件夹WorkPlace中
+&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/workPlace.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;2创建一个主app工程&quot;&gt;2.创建一个主APP工程&lt;/h4&gt;
+&lt;p&gt;将创建的工程放入WorkPlace与之前创建的工作工程同级
+***
+&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/cocoaTouch.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;3创建一个cocoa-touch-static-library的静态库&quot;&gt;3.创建一个Cocoa Touch Static Library的静态库&lt;/h4&gt;
+&lt;p&gt;将创建的工程放入WorkPlace与之前创建的工作工程同级&lt;/p&gt;
+&lt;h4 id=&quot;4创建一个cocoa-touch-framework的静态库&quot;&gt;4.创建一个Cocoa Touch FrameWork的静态库&lt;/h4&gt;
+&lt;p&gt;将创建的工程放入WorkPlace与之前创建的工作工程同级&lt;/p&gt;
+&lt;h4 id=&quot;5目前工程的目录结构&quot;&gt;5.目前工程的目录结构&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Contents.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;二将三个工程添加到workspace&quot;&gt;二：将三个工程添加到Workspace&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;点开workPlace.xcworkspace，然后添加对于的.xcodeproj
+&amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/addFile.png&quot; alt=&quot;image&quot; /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;三将两个静态库添加到主工程&quot;&gt;三：将两个静态库添加到主工程&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;设置两个静态库的Edit Scheme在Run的时候为Release
+&amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/editScheme.png&quot; alt=&quot;image&quot; /&gt;&lt;/li&gt;
+  &lt;li&gt;在主工程里面添加Header Search Paths
+&amp;lt;/br&amp;gt;在主项目的Build Settings 里找到Header Search Paths，添加一项&lt;code class=&quot;highlighter-rouge&quot;&gt;$(SRCROOT)/../Framework&lt;/code&gt;
+&amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/HeaderSearch.png&quot; alt=&quot;image&quot; /&gt;&lt;/li&gt;
+  &lt;li&gt;静态库添加到主工程里
+&amp;lt;/br&amp;gt;在主项目的Build Phases 里找到Link Binary With Libraries添加对接的静态库
+&amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/LinkBinary.png&quot; alt=&quot;image&quot; /&gt;
+&amp;lt;/br&amp;gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;lt;font color=red&amp;gt;注意：swift里面的Framework需要在target -&amp;gt; General -&amp;gt;Embedded Binaries 中添加这个framework&amp;lt;/font&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io&quot;&gt;swift—–打包自己的framework&lt;/a&gt;）
+&amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Embedded.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;为.a的静态库添加swift和OC的桥接文件
+&amp;lt;/br&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io&quot;&gt;Bridging-Header—–手动创建桥接文件&lt;/a&gt;）&lt;/li&gt;
+  &lt;li&gt;在主工程中导入头文件Build&lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Wed, 07 Feb 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/02/07/Workspace/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/02/07/Workspace/</guid>
+        
+        <category>备忘录</category>
+        
+        
+      </item>
     
       <item>
         <title>iOS备忘录3-图片处理</title>
@@ -34,8 +107,8 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </description>
         <pubDate>Thu, 15 Jun 2017 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2017/06/15/js-%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/</link>
-        <guid isPermaLink="true">http://localhost:4000/2017/06/15/js-%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/</guid>
+        <link>http://localhost:4000/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/</guid>
         
         <category>备忘录</category>
         
@@ -73,8 +146,8 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </description>
         <pubDate>Thu, 15 Jun 2017 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2017/06/15/js-%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/</link>
-        <guid isPermaLink="true">http://localhost:4000/2017/06/15/js-%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/</guid>
+        <link>http://localhost:4000/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/</guid>
         
         <category>备忘录</category>
         
@@ -192,8 +265,8 @@ addCity.block = ^(NSString *name, NSString *population) {
 &lt;h5 id=&quot;场景二数据请求二次封装afnetworking未完待续&quot;&gt;场景二：数据请求（二次封装AFNetworking）：未完待续…&lt;/h5&gt;
 </description>
         <pubDate>Tue, 10 Jan 2017 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2017/01/10/js-delegateAndBlock/</link>
-        <guid isPermaLink="true">http://localhost:4000/2017/01/10/js-delegateAndBlock/</guid>
+        <link>http://localhost:4000/2017/01/10/delegateAndBlock/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/01/10/delegateAndBlock/</guid>
         
         <category>备忘录</category>
         
@@ -238,8 +311,8 @@ addCity.block = ^(NSString *name, NSString *population) {
 
 </description>
         <pubDate>Fri, 09 Dec 2016 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2016/12/09/js-goodnight/</link>
-        <guid isPermaLink="true">http://localhost:4000/2016/12/09/js-goodnight/</guid>
+        <link>http://localhost:4000/2016/12/09/goodnight/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/12/09/goodnight/</guid>
         
         <category>小萍</category>
         
@@ -320,8 +393,8 @@ addCity.block = ^(NSString *name, NSString *population) {
 
 </description>
         <pubDate>Sun, 04 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2016/09/04/js-parents/</link>
-        <guid isPermaLink="true">http://localhost:4000/2016/09/04/js-parents/</guid>
+        <link>http://localhost:4000/2016/09/04/parents/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/09/04/parents/</guid>
         
         <category>小萍</category>
         

@@ -10,7 +10,7 @@
     <meta name="keywords"  content="minsol">
     <meta name="theme-color" content="#000000">
     
-    <title>iOS备忘录1-委托和Block的回调 - Minsol Blog</title>
+    <title>iOS备忘录2-视频处理 - Minsol Blog</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="http://localhost:4000/2017/01/10/js-delegateAndBlock/">
+    <link rel="canonical" href="http://localhost:4000/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -173,12 +173,12 @@
                         <a class="tag" href="/tags/#备忘录" title="备忘录">备忘录</a>
                         
                     </div>
-                    <h1>iOS备忘录1-委托和Block的回调</h1>
+                    <h1>iOS备忘录2-视频处理</h1>
                     
                     
-                    <h2 class="subheading">在本文中只记录在实际应用中委托和Block回调的简单使用，做以备忘。</h2>
+                    <h2 class="subheading">在本文中只记录在实际应用中视频处理的简单使用，做以备忘。</h2>
                     
-                    <span class="meta">Posted by minsol on January 10, 2017</span>
+                    <span class="meta">Posted by minsol on June 15, 2017</span>
                 </div>
             </div>
         </div>
@@ -197,112 +197,32 @@
                 post-container">
 
 				<h3 id="前言">前言</h3>
-<p>在本文中只记录在实际应用中委托和Block回调的简单使用，做以备忘。</p>
+<p>在本文中只记录在实际应用中视频处理的简单使用，做以备忘。</p>
 
-<h3 id="委托delegate">委托（Delegate）</h3>
+<h3 id="针对本地视频的需求简介">针对本地视频的需求简介</h3>
+<ul>
+  <li><a href="#视频剪切">视频剪切</a></li>
+  <li><a href="#视频快速播放">视频快速播放</a></li>
+  <li><a href="#视频添加实时滤镜">视频添加实时滤镜</a></li>
+  <li><a href="#视频叠加背景音乐">视频叠加背景音乐</a></li>
+  <li><a href="#视频叠加水印">视频叠加水印</a></li>
+  <li><a href="#视频写入本地并导出到系统相册">视频写入本地并导出到系统相册</a></li>
+</ul>
 
-<h5 id="首先明确两点概念">首先明确两点概念：</h5>
+<h5 id="视频剪切">视频剪切</h5>
 
-<blockquote>
-  <p><strong>委托（Delegate）：委托是Objective-C中常用的一种设计模式（也叫代理设计模式），由代理对象、委托者、协议三部分组成。</strong></p>
-</blockquote>
+<h5 id="视频快速播放">视频快速播放</h5>
 
-<blockquote>
-  <p><strong>协议 (Protocol)：就是遵守了某个协议后就要按照这个协议来办事，通常@protocol与@end在 声明协议时是成对出现。</strong></p>
-</blockquote>
+<h5 id="视频添加实时滤镜">视频添加实时滤镜</h5>
 
-<blockquote>
-  <p><em>注1：其实<strong>Protocol</strong>和<strong>Delegate</strong>完全不是一回事，只是因为代理的实现通常与协议是密不可分的，所以我们经常在同一个头文件里看到这两个单词才将这两个放在一起说。</em></p>
-</blockquote>
+<h5 id="视频叠加背景音乐">视频叠加背景音乐</h5>
 
-<h5 id="委托的使用流程">委托的使用流程</h5>
+<h5 id="视频叠加水印">视频叠加水印</h5>
 
-<blockquote>
-  <p>委托方：1.指定原则（协议）2.声明一个代理人的属性（delegate）3.在适当的时机，通知代理人执行代理方法</p>
-</blockquote>
+<h5 id="视频写入本地并导出到系统相册">视频写入本地并导出到系统相册</h5>
 
-<blockquote>
-  <p>代理方： 1.遵守协议 2.设置自己为委托方的代理人 3.实现 协议方法</p>
-</blockquote>
-
-<h6 id="我是委托方">·我是委托方</h6>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>委托方的 .h 文件中实现上诉1、2两点：指定原则（协议）、声明一个代理人的属性（delegate）
-#import &lt;UIKit/UIKit.h&gt;
-@protocol SJSAddUserDelegate &lt;NSObject&gt;
-//代理方必须实现的方法
-@required
-//代理方可选实现的方法
-@optional
-- (void)updataUser;//可以带参
-@end
-
-@interface SJSAddUserViewController : UIViewController
-//关键属性委托代理人，为了避免造成循环引用，代理一般需使用弱引用
-@property (nonatomic, weak) id&lt;SJSAddUserDelegate&gt; delegate;
-@end
-
-委托方的 .m 文件中实现上诉第三点：在适当的时机，通知代理人执行代理方法
-if ([self.delegate respondsToSelector:@selector(updataUser)]){
-	[self.delegate updataUser];//在适当的时候调用代理方法
-}
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 </code></pre></div></div>
-
-<h6 id="我是代理方">·我是代理方</h6>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>代理方的.m文件中实现上诉第一点：遵守协议
-@interface SJSUserController ()&lt;SJSAddUserDelegate&gt;
-第二点：设置自己为委托方的代理人
-addVc.delegate = self;//在创建委托方的时候指定直接为代理人
-第三点：实现 协议方法
--(void)updataUser{
-    //做代理人应该做的事
-}
-</code></pre></div></div>
-
-<h3 id="block">Block</h3>
-<p>Block的详细介绍请参照：<a href="http://www.jianshu.com/p/007632bbb01d">iOS-Block的详解</a>具体进行了解。</p>
-
-<h5 id="场景一回调">场景一：回调</h5>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>委托方.h
-//声明一个Block类型的别名
-typedef void(^AddCityFinish_Block)(NSString*,NSString*);
-
-//声明block属性
-@property(nonatomic,copy) AddCityFinish_Block block;
-//用于直接传Block：方便愉快的撸代码
-- (void)returnText:(AddCityFinish_Block)block;
-
-委托方.m
-/**
- *  对Block进行赋值  ，在代理方就直接调用方法就可以了
- *  这个就是相当于一个setter方法，对自己的block属性进行赋值
- *  @param block
- */
-- (void)returnText:(AddCityFinish_Block)block{
-    self.block = _block;
-}
-
-//适当的时机 执行block所代表的匿名函数：并将数据作为参数传回去
-self.block(self.cityNameField.text, self.populationField.text);
-</code></pre></div></div>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>代理方.m文件中
-//在创建写一个界面的时候，设置下个界面的block属性为这里的匿名函数
-
-/** Block方法一 ： 写Block的时候没有提示 */
-addCity.block = ^(NSString *name, NSString *population) {
-//做代理人应该做的事
-};
-
-/** Block方法二 ： 写Block的时候有提示 （方便快捷）*/
-[addCity returnText:^(NSString * name , NSString *population ) {
-//做代理人应该做的事
-}];
-</code></pre></div></div>
-
-<h5 id="场景二数据请求二次封装afnetworking未完待续">场景二：数据请求（二次封装AFNetworking）：未完待续…</h5>
 
 
                 <hr style="visibility: hidden;">
@@ -313,17 +233,17 @@ addCity.block = ^(NSString *name, NSString *population) {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/12/09/js-goodnight/" data-toggle="tooltip" data-placement="top" title="晚安，别睡的太晚">
+                        <a href="/2017/01/10/delegateAndBlock/" data-toggle="tooltip" data-placement="top" title="iOS备忘录1-委托和Block的回调">
                         Previous<br>
-                        <span>晚安，别睡的太晚</span>
+                        <span>iOS备忘录1-委托和Block的回调</span>
                         </a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2017/06/15/js-%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录2-视频处理">
+                        <a href="/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录3-图片处理">
                         Next<br>
-                        <span>iOS备忘录2-视频处理</span>
+                        <span>iOS备忘录3-图片处理</span>
                         </a>
                     </li>
                     

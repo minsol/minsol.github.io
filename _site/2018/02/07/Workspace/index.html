@@ -10,7 +10,7 @@
     <meta name="keywords"  content="minsol">
     <meta name="theme-color" content="#000000">
     
-    <title>晚安，别睡的太晚 - Minsol Blog</title>
+    <title>iOS使用Workspace来管理自己的项目和Framework - Minsol Blog</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="http://localhost:4000/2016/12/09/js-goodnight/">
+    <link rel="canonical" href="http://localhost:4000/2018/02/07/Workspace/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -170,15 +170,15 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/#小萍" title="小萍">小萍</a>
+                        <a class="tag" href="/tags/#备忘录" title="备忘录">备忘录</a>
                         
                     </div>
-                    <h1>晚安，别睡的太晚</h1>
+                    <h1>iOS使用Workspace来管理自己的项目和Framework</h1>
                     
                     
-                    <h2 class="subheading">读书的时候我喜欢熬夜，喜欢晚睡。</h2>
+                    <h2 class="subheading">本文记录在实际开发中使用Workspace来管理自己的项目和Framework。</h2>
                     
-                    <span class="meta">Posted by 葵小陈 on December 9, 2016</span>
+                    <span class="meta">Posted by minsol on February 7, 2018</span>
                 </div>
             </div>
         </div>
@@ -196,39 +196,66 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<h2 id="晚安">晚安</h2>
+				<h3 id="前言">前言</h3>
+<p>本文记录在实际开发中使用Workspace来管理自己的项目和Framework
+<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/framework.png" alt="image" /></p>
+
+<hr />
+
+<h3 id="概念">概念</h3>
 
 <blockquote>
-  <p>别睡的太晚</p>
+  <ol>
+    <li>Framework是资源的集合，将静态库和其头文件包含到一个结构中:.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。<code class="highlighter-rouge">.a + .h + sourceFile = .framework。</code></li>
+    <li>静态库：链接时，静态库会被完整地复制到可执行文件中，被多次使用就有多份冗余拷贝</li>
+    <li>动态库：链接时不复制，程序运行时由系统动态加载到内存，供程序调用，系统只加载一次，多个程序共用，节省内存</li>
+    <li>注意理解：无论是.a静态库还.framework静态库，我们需要的都是二进制文件+.h+其它资源文件的形式，不同的是，.a本身就是二进制文件，需要我们自己配上.h和其它文件才能使用，而.framework本身已经包含了.h和其它文件，可以直接使用。</li>
+    <li>图片资源的处理：两种静态库，一般都是把图片文件单独的放在一个.bundle文件中，一般.bundle的名字和.a或.framework的名字相同。.bundle文件很好弄，新建一个文件夹，把它改名为.bundle就可以了，右键，显示包内容可以向其中添加图片资源。</li>
+    <li>category是我们实际开发项目中经常用到的，把category打成静态库是没有问题的，但是在用这个静态库的工程中，调用category中的方法时会有找不到该方法的运行时错误（selector not recognized），解决办法是：在使用静态库的工程中配置other linker flags的值为-ObjC。</li>
+    <li>如果一个静态库很复杂，需要暴露的.h比较多的话，就可以在静态库的内部创建一个.h文件（一般这个.h文件的名字和静态库的名字相同），然后把所有需要暴露出来的.h文件都集中放在这个.h文件中，而那些原本需要暴露的.h都不需要再暴露了，只需要把.h暴露出来就可以了。</li>
+  </ol>
 </blockquote>
 
-<p>读书的时候我喜欢熬夜，喜欢晚睡。﻿﻿</p>
+<h3 id="一准备工作">一：准备工作</h3>
+<h4 id="1创建一个工作空间">1.创建一个工作空间。</h4>
+<p>File-&gt;New-&gt;Workspace,命名为workPlace,存放在文件夹WorkPlace中
+<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/workPlace.png" alt="image" /></p>
+<h4 id="2创建一个主app工程">2.创建一个主APP工程</h4>
+<p>将创建的工程放入WorkPlace与之前创建的工作工程同级
+***
+<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/cocoaTouch.png" alt="image" /></p>
+<h4 id="3创建一个cocoa-touch-static-library的静态库">3.创建一个Cocoa Touch Static Library的静态库</h4>
+<p>将创建的工程放入WorkPlace与之前创建的工作工程同级</p>
+<h4 id="4创建一个cocoa-touch-framework的静态库">4.创建一个Cocoa Touch FrameWork的静态库</h4>
+<p>将创建的工程放入WorkPlace与之前创建的工作工程同级</p>
+<h4 id="5目前工程的目录结构">5.目前工程的目录结构</h4>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Contents.png" alt="image" /></p>
 
-<p>当时觉得，熬夜算什么？晚睡又如何？二十多岁的年纪，不去熬夜happy，难不成要等到六十多岁再去体验疯狂吗？﻿﻿</p>
+<h3 id="二将三个工程添加到workspace">二：将三个工程添加到Workspace</h3>
+<ol>
+  <li>点开workPlace.xcworkspace，然后添加对于的.xcodeproj
+&lt;/br&gt;<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/addFile.png" alt="image" /></li>
+</ol>
 
-<p>然而，当我开始皮肤变差、黑眼圈日益加深、还伴随着头痛眼睛痛……这一切迹象告诉我，熬夜和晚睡，是要付出代价的。﻿﻿</p>
-
-<p>刚开始还不以为然，觉得这就是熬夜的副作用，补眠可以补回来，可是，当我连续睡了几天之后，头却痛得越来越频繁。赶紧去看了医生，好在结果不算坏。医生说今后只要注意休息，不要熬夜，把作息习惯调整过来，不要晚上熬夜白天补，觉，是补不回来的。﻿﻿</p>
-
-<p>这之后，我开始意识到健康的重要性，你消耗身体取得成就，同时也失去健康，得到一副藏满病魔的躯体。﻿﻿</p>
-
-<p><img src="http://ohwmdtyfr.bkt.clouddn.com/home-bg-o.jpg" alt="晚安" /></p>
-
-<p>近年来，网络上连续曝出很多因工作熬夜去世的人。﻿﻿</p>
-
-<p>翻看这些人过往的生活，发现熬夜加班和经常晚睡是其家常便饭；长期睡眠不足，有人甚至连续几天只睡几个小时。﻿﻿</p>
-
-<p>因为长期熬夜，你的身体机能变差了，头脑变得混沌，就像是亲手安装在身体内部威力无比的炸药，只等哪一天爆发。﻿﻿</p>
-
-<p>如果你经历过生离死别的场面，你就会懂得健康对于一个人来说多么重要。﻿﻿</p>
-
-<p>每个人都扮演着多重角色，一旦遭遇不测，遭遇痛苦袭击的，却是一个家庭。当你经历过生死，你会发现，相比你要怎么努力，怎么拼命，来获取一种高质量的生活；拥有一个健康的身体，一个健全的家庭，远比这些可以看得见的东西还要重要。因为你，不是一个人，你身后是一个家。﻿﻿</p>
-
-<p>所以，不管你今天的工作有没有做完；不管你今天是否要通宵happy；不管你准备熬夜干什么，都请停下来，去睡觉。﻿﻿</p>
-
-<p>任何事情都可以等到明天，唯独身体和健康，不会等。﻿﻿</p>
-
-<p>所以，别睡得太晚。﻿</p>
+<h3 id="三将两个静态库添加到主工程">三：将两个静态库添加到主工程</h3>
+<ol>
+  <li>设置两个静态库的Edit Scheme在Run的时候为Release
+&lt;/br&gt;<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/editScheme.png" alt="image" /></li>
+  <li>在主工程里面添加Header Search Paths
+&lt;/br&gt;在主项目的Build Settings 里找到Header Search Paths，添加一项<code class="highlighter-rouge">$(SRCROOT)/../Framework</code>
+&lt;/br&gt;<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/HeaderSearch.png" alt="image" /></li>
+  <li>静态库添加到主工程里
+&lt;/br&gt;在主项目的Build Phases 里找到Link Binary With Libraries添加对接的静态库
+&lt;/br&gt;<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/LinkBinary.png" alt="image" />
+&lt;/br&gt;</li>
+</ol>
+<p>&lt;font color=red&gt;注意：swift里面的Framework需要在target -&gt; General -&gt;Embedded Binaries 中添加这个framework&lt;/font&gt;（详情参见之前文章<a href="https://minsol.github.io">swift—–打包自己的framework</a>）
+&lt;/br&gt;<img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Embedded.png" alt="image" /></p>
+<ol>
+  <li>为.a的静态库添加swift和OC的桥接文件
+&lt;/br&gt;（详情参见之前文章<a href="https://minsol.github.io">Bridging-Header—–手动创建桥接文件</a>）</li>
+  <li>在主工程中导入头文件Build</li>
+</ol>
 
 
 
@@ -240,19 +267,12 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/09/04/js-parents/" data-toggle="tooltip" data-placement="top" title="你养我长大，我陪你变老">
+                        <a href="/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录3-图片处理">
                         Previous<br>
-                        <span>你养我长大，我陪你变老</span>
+                        <span>iOS备忘录3-图片处理</span>
                         </a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2017/01/10/js-delegateAndBlock/" data-toggle="tooltip" data-placement="top" title="iOS备忘录1-委托和Block的回调">
-                        Next<br>
-                        <span>iOS备忘录1-委托和Block的回调</span>
-                        </a>
-                    </li>
                     
                 </ul>
 

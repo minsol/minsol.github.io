@@ -10,7 +10,7 @@
     <meta name="keywords"  content="minsol">
     <meta name="theme-color" content="#000000">
     
-    <title>iOS备忘录2-视频处理 - Minsol Blog</title>
+    <title>iOS备忘录3-图片处理 - Minsol Blog</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="http://localhost:4000/2017/06/15/js-%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/">
+    <link rel="canonical" href="http://localhost:4000/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -173,10 +173,10 @@
                         <a class="tag" href="/tags/#备忘录" title="备忘录">备忘录</a>
                         
                     </div>
-                    <h1>iOS备忘录2-视频处理</h1>
+                    <h1>iOS备忘录3-图片处理</h1>
                     
                     
-                    <h2 class="subheading">在本文中只记录在实际应用中视频处理的简单使用，做以备忘。</h2>
+                    <h2 class="subheading">在本文中只记录在实际应用中图片处理的简单使用，做以备忘。</h2>
                     
                     <span class="meta">Posted by minsol on June 15, 2017</span>
                 </div>
@@ -197,31 +197,25 @@
                 post-container">
 
 				<h3 id="前言">前言</h3>
-<p>在本文中只记录在实际应用中视频处理的简单使用，做以备忘。</p>
+<p>在本文中只记录在实际应用中图片处理的简单使用，做以备忘。</p>
 
-<h3 id="针对本地视频的需求简介">针对本地视频的需求简介</h3>
-<ul>
-  <li><a href="#视频剪切">视频剪切</a></li>
-  <li><a href="#视频快速播放">视频快速播放</a></li>
-  <li><a href="#视频添加实时滤镜">视频添加实时滤镜</a></li>
-  <li><a href="#视频叠加背景音乐">视频叠加背景音乐</a></li>
-  <li><a href="#视频叠加水印">视频叠加水印</a></li>
-  <li><a href="#视频写入本地并导出到系统相册">视频写入本地并导出到系统相册</a></li>
-</ul>
-
-<h5 id="视频剪切">视频剪切</h5>
-
-<h5 id="视频快速播放">视频快速播放</h5>
-
-<h5 id="视频添加实时滤镜">视频添加实时滤镜</h5>
-
-<h5 id="视频叠加背景音乐">视频叠加背景音乐</h5>
-
-<h5 id="视频叠加水印">视频叠加水印</h5>
-
-<h5 id="视频写入本地并导出到系统相册">视频写入本地并导出到系统相册</h5>
-
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+     获取图片中的像素颜色值
+     - parameter pos: 图片中的位置
+     - returns: 颜色值
+     */</span>
+    <span class="kd">func</span> <span class="nf">getPixelColor</span><span class="p">(</span><span class="nv">pos</span><span class="p">:</span><span class="kt">CGPoint</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">(</span><span class="kt">UIColor</span><span class="p">){</span>
+        <span class="k">let</span> <span class="nv">pixelData</span><span class="o">=</span><span class="k">self</span><span class="o">.</span><span class="n">cgImage</span><span class="o">!.</span><span class="n">dataProvider</span><span class="o">!.</span><span class="n">data</span>
+        <span class="k">let</span> <span class="nv">data</span><span class="p">:</span><span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span> <span class="o">=</span> <span class="kt">CFDataGetBytePtr</span><span class="p">(</span><span class="n">pixelData</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">pixelInfo</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="p">((</span><span class="kt">Int</span><span class="p">(</span><span class="k">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="kt">Int</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">))</span> <span class="o">+</span> <span class="kt">Int</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="mi">4</span>
+        
+        <span class="k">let</span> <span class="nv">r</span> <span class="o">=</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">pixelInfo</span><span class="p">])</span> <span class="o">/</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="mf">255.0</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">g</span> <span class="o">=</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">pixelInfo</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="mf">255.0</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">b</span> <span class="o">=</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">pixelInfo</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="mf">255.0</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">a</span> <span class="o">=</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">pixelInfo</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="mf">255.0</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="kt">UIColor</span><span class="p">(</span><span class="nv">colorLiteralRed</span><span class="p">:</span> <span class="kt">Float</span><span class="p">(</span><span class="n">r</span><span class="p">),</span> <span class="nv">green</span><span class="p">:</span> <span class="kt">Float</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="nv">blue</span><span class="p">:</span> <span class="kt">Float</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="nv">alpha</span><span class="p">:</span> <span class="kt">Float</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+    <span class="p">}</span>
 </code></pre></div></div>
 
 
@@ -233,17 +227,17 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2017/01/10/js-delegateAndBlock/" data-toggle="tooltip" data-placement="top" title="iOS备忘录1-委托和Block的回调">
+                        <a href="/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录2-视频处理">
                         Previous<br>
-                        <span>iOS备忘录1-委托和Block的回调</span>
+                        <span>iOS备忘录2-视频处理</span>
                         </a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2017/06/15/js-%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录3-图片处理">
+                        <a href="/2018/02/07/Workspace/" data-toggle="tooltip" data-placement="top" title="iOS使用Workspace来管理自己的项目和Framework">
                         Next<br>
-                        <span>iOS备忘录3-图片处理</span>
+                        <span>iOS使用Workspace来管理自己的项目和Framework</span>
                         </a>
                     </li>
                     
