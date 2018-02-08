@@ -60,10 +60,10 @@ File->New->Workspace,命名为workPlace,存放在文件夹WorkPlace中
 </br>在主项目的Build Phases 里找到Link Binary With Libraries添加对接的静态库
 </br>![image](https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/LinkBinary.png)
 </br>
-<font color=red>注意：swift里面的Framework需要在target -> General ->Embedded Binaries 中添加这个framework</font>（详情参见之前文章[swift-----打包自己的framework](https://minsol.github.io)）
+<font color=red>注意：swift里面的Framework需要在target -> General ->Embedded Binaries 中添加这个framework</font>（详情参见之前文章[swift-----打包自己的framework](https://minsol.github.io/2018/02/07/FrameWork/)）
 </br>![image](https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Embedded.png)
 4. 为.a的静态库添加swift和OC的桥接文件
-</br>（详情参见之前文章[Bridging-Header-----手动创建桥接文件](https://minsol.github.io)）
+</br>（详情参见之前文章[Bridging-Header-----手动创建桥接文件](https://minsol.github.io/2018/02/07/Bridging-Header-2/)）
 5. 在主工程中导入头文件Build
 
 
