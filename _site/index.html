@@ -185,6 +185,7 @@
         <div class="post-content-preview">
             前言
 本文记录在实际开发中使用Workspace来管理自己的项目和Framework
+&lt;/br&gt;本文DemoDemo地址
 
 
 
@@ -194,7 +195,70 @@
 
   
     Framework是资源的集合，将静态库和其头文件包含到一个结构中:.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。.a + .h + sourceFile = .framework。
-    静态库：链接时，静态库会被完整地复制到可执行文件...
+    ...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by minsol on February 7, 2018
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2018/02/07/FrameWork/">
+        <h2 class="post-title">
+            iOS打包自己的framework
+        </h2>
+        
+        <h3 class="post-subtitle">
+            本文记录在实际开发中打包自己的framework。
+        </h3>
+        
+        <div class="post-content-preview">
+            前言
+本文记录在实际开发中打包自己的framework
+
+
+
+
+概念
+
+
+  
+    Framework是资源的集合，将静态库和其头文件包含到一个结构中:.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。.a + .h + sourceFile = .framework。
+    静态库：链接时，静态库会被完整地复制到可执行文件中，被多次使用就有多份冗余拷贝...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by minsol on February 7, 2018
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2018/02/07/Bridging-Header-2/">
+        <h2 class="post-title">
+            iOS_Swift中桥接头文件建立的两种方法
+        </h2>
+        
+        <h3 class="post-subtitle">
+            本文记录在实际开发中桥接头文件建立的两种方法。
+        </h3>
+        
+        <div class="post-content-preview">
+            前言
+本文记录在实际开发中桥接头文件建立的两种方法
+&lt;/br&gt;备注：swift环境
+***
+
+方式一：在swift环境下的工程里面还没有加入任何Objective-C的文件时
+直接创建一个Objective-C的文件
+
+
+方式二：自己手动创建
+1.创建一个Header File
+
+2.路径选择TARGETS———BuildSetting———搜索header------$(PRO...
         </div>
     </a>
     <p class="post-meta">

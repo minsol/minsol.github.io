@@ -189,7 +189,8 @@ a.button { display: inline-block; }
 .section__header {
 	text-shadow: 1px 1px 0 #fff;
 	line-height: 1.4;
-	background: url('/img/o_jw_1.jpg') left no-repeat;
+	background: left no-repeat;
+	/* background: url('/img/o_jw_1.jpg') left no-repeat; */
 }
 .section__header__title, .section__header__subtitle {
 	font-family: 'Microsoft JhengHei', 'Microsoft YaHei', 'STHeiti SC', 'SimHei';

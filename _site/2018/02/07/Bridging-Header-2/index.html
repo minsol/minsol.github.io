@@ -10,7 +10,7 @@
     <meta name="keywords"  content="minsol">
     <meta name="theme-color" content="#000000">
     
-    <title>Tags - Minsol Blog</title>
+    <title>iOS_Swift中桥接头文件建立的两种方法 - Minsol Blog</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="http://localhost:4000/tags/">
+    <link rel="canonical" href="http://localhost:4000/2018/02/07/Bridging-Header-2/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -149,211 +149,194 @@
 </script>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/tag-bg.jpg')">
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-universe.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-universe.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading" id="tag-heading">
-                    <h1>Tags</h1>
-                    <span class="subheading">keep hungry,keep foolish.</span>
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#备忘录" title="备忘录">备忘录</a>
+                        
+                    </div>
+                    <h1>iOS_Swift中桥接头文件建立的两种方法</h1>
+                    
+                    
+                    <h2 class="subheading">本文记录在实际开发中桥接头文件建立的两种方法。</h2>
+                    
+                    <span class="meta">Posted by minsol on February 7, 2018</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <!-- 标签云 -->
-			<div id='tag_cloud' class="tags">
-				
-				<a href="#小萍" title="小萍" rel="2">小萍</a>
-				
-				<a href="#备忘录" title="备忘录" rel="6">备忘录</a>
-				
-			</div>
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
 
-            <!--<blockquote class="tag-comments">
-                标签命名规范：
-                    <li>行业观察、职位、公司优先使用中文</li>
-                    <li>外国产品、术语优先使用英文</li>
-            </blockquote>-->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
 
-            <!-- 标签列表 -->
-			
-			<div class="one-tag-list">
-			  	<span class="fa fa-tag listing-seperator" id="小萍">
-                    <span class="tag-text">小萍</span>
-                </span>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2016-12-09">2016-12-09</time>
-				  <a href="/2016/12/09/goodnight/" title="晚安，别睡的太晚">晚安，别睡的太晚</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2016/12/09/goodnight/">
-				        <h2 class="post-title">
-                            晚安，别睡的太晚
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            读书的时候我喜欢熬夜，喜欢晚睡。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2016-12-09</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2016-09-04">2016-09-04</time>
-				  <a href="/2016/09/04/parents/" title="你养我长大，我陪你变老">你养我长大，我陪你变老</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2016/09/04/parents/">
-				        <h2 class="post-title">
-                            你养我长大，我陪你变老
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            想写这篇文章很久了。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2016-09-04</p> -->
-				</div>
-				<hr>
-				
-			</div>
-			
-			<div class="one-tag-list">
-			  	<span class="fa fa-tag listing-seperator" id="备忘录">
-                    <span class="tag-text">备忘录</span>
-                </span>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2018-02-07">2018-02-07</time>
-				  <a href="/2018/02/07/Workspace/" title="iOS使用Workspace来管理自己的项目和Framework">iOS使用Workspace来管理自己的项目和Framework</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2018/02/07/Workspace/">
-				        <h2 class="post-title">
-                            iOS使用Workspace来管理自己的项目和Framework
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            本文记录在实际开发中使用Workspace来管理自己的项目和Framework。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2018-02-07</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2018-02-07">2018-02-07</time>
-				  <a href="/2018/02/07/FrameWork/" title="iOS打包自己的framework">iOS打包自己的framework</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2018/02/07/FrameWork/">
-				        <h2 class="post-title">
-                            iOS打包自己的framework
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            本文记录在实际开发中打包自己的framework。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2018-02-07</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2018-02-07">2018-02-07</time>
-				  <a href="/2018/02/07/Bridging-Header-2/" title="iOS_Swift中桥接头文件建立的两种方法">iOS_Swift中桥接头文件建立的两种方法</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2018/02/07/Bridging-Header-2/">
-				        <h2 class="post-title">
-                            iOS_Swift中桥接头文件建立的两种方法
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            本文记录在实际开发中桥接头文件建立的两种方法。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2018-02-07</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2017-06-15">2017-06-15</time>
-				  <a href="/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/" title="iOS备忘录3-图片处理">iOS备忘录3-图片处理</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/">
-				        <h2 class="post-title">
-                            iOS备忘录3-图片处理
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            在本文中只记录在实际应用中图片处理的简单使用，做以备忘。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2017-06-15</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2017-06-15">2017-06-15</time>
-				  <a href="/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/" title="iOS备忘录2-视频处理">iOS备忘录2-视频处理</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2017/06/15/%E8%A7%86%E9%A2%91%E7%BC%96%E8%BE%91/">
-				        <h2 class="post-title">
-                            iOS备忘录2-视频处理
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            在本文中只记录在实际应用中视频处理的简单使用，做以备忘。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2017-06-15</p> -->
-				</div>
-				<hr>
-				
-				  <!-- <li class="listing-item">
-				  <time datetime="2017-01-10">2017-01-10</time>
-				  <a href="/2017/01/10/delegateAndBlock/" title="iOS备忘录1-委托和Block的回调">iOS备忘录1-委托和Block的回调</a>
-				  </li> -->
-				 <div class="post-preview">
-				    <a href="/2017/01/10/delegateAndBlock/">
-				        <h2 class="post-title">
-                            iOS备忘录1-委托和Block的回调
-				        </h2>
-				        
-				        <h3 class="post-subtitle">
-				            在本文中只记录在实际应用中委托和Block回调的简单使用，做以备忘。
-				        </h3>
-				        
-				    </a>
-				    <!-- <p class="post-meta">2017-01-10</p> -->
-				</div>
-				<hr>
-				
-			</div>
-			
+				<h3 id="前言">前言</h3>
+<p>本文记录在实际开发中桥接头文件建立的两种方法
+&lt;/br&gt;备注：swift环境
+***</p>
 
-		</div>
-	</div>
-</div>
+<h3 id="方式一在swift环境下的工程里面还没有加入任何objective-c的文件时">方式一：在swift环境下的工程里面还没有加入任何Objective-C的文件时</h3>
+<h4 id="直接创建一个objective-c的文件">直接创建一个Objective-C的文件</h4>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header1.png" alt="image" /></p>
+
+<h3 id="方式二自己手动创建">方式二：自己手动创建</h3>
+<h4 id="1创建一个header-file">1.创建一个Header File</h4>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header2.png" alt="image" /></p>
+<h4 id="2路径选择targetsbuildsetting搜索header------project_dir项目名字bridging-headerh">2.路径选择<code class="highlighter-rouge">TARGETS———BuildSetting———搜索header------$(PROJECT_DIR)/项目名字/Bridging-Header.h</code></h4>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header3.png" alt="image" /></p>
+<h4 id="3编译通过">3.编译通过</h4>
+
+<h3 id="顺便记录一下objective-c下的pch的创建">顺便记录一下Objective-C下的PCH的创建</h3>
+<h4 id="先说一下pch的作用">先说一下pch的作用：</h4>
+<p>预编译头文件(一般扩展名为.PCH),是把一个工程中较稳定的代码预先编译好放在一个文件(.PCH)里,它们在整个工程中是较为稳定的,即在工程开发过程中不会经常被修改的代码。在我的理解里是把一些宏定义（kScreenW等），一些要在多个类中使用的头文件在此文件中书写。简单来说，在.pch文件中定义的宏定义会作用到项目中的所有文件。</p>
+<blockquote>
+  <ol>
+    <li>存放一些全局的宏(整个项目中都用得上的宏)；</li>
+    <li>用来包含一些全部的头文件(整个项目中都用得上的头文件)；</li>
+    <li>能自动打开或者关闭日志输出功能。</li>
+  </ol>
+</blockquote>
+
+<h4 id="实际操作">实际操作：</h4>
+<h5 id="1创建一个header-file-1">1.创建一个Header File</h5>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header4.png" alt="image" /></p>
+<h5 id="2路径选择targetsbuildsetting搜索pch------project_dir项目名字bridging-headerh">2.路径选择<code class="highlighter-rouge">TARGETS———BuildSetting———搜索pch------$(PROJECT_DIR)/项目名字/Bridging-Header.h</code></h5>
+<p><img src="https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header5.png" alt="image" /></p>
+<h4 id="3编译通过-1">3.编译通过</h4>
+
+
+
+                <hr style="visibility: hidden;">
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/06/15/%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91/" data-toggle="tooltip" data-placement="top" title="iOS备忘录3-图片处理">
+                        Previous<br>
+                        <span>iOS备忘录3-图片处理</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/02/07/FrameWork/" data-toggle="tooltip" data-placement="top" title="iOS打包自己的framework">
+                        Next<br>
+                        <span>iOS打包自己的framework</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
 
 
     <!-- Footer -->
@@ -504,6 +487,50 @@
 
 
 <!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
 
 
 

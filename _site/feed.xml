@@ -5,14 +5,15 @@
     <description>hello</description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 07 Feb 2018 14:01:18 +0800</pubDate>
-    <lastBuildDate>Wed, 07 Feb 2018 14:01:18 +0800</lastBuildDate>
+    <pubDate>Tue, 27 Feb 2018 17:44:12 +0800</pubDate>
+    <lastBuildDate>Tue, 27 Feb 2018 17:44:12 +0800</lastBuildDate>
     <generator>Jekyll v3.7.2</generator>
     
       <item>
         <title>iOS使用Workspace来管理自己的项目和Framework</title>
         <description>&lt;h3 id=&quot;前言&quot;&gt;前言&lt;/h3&gt;
 &lt;p&gt;本文记录在实际开发中使用Workspace来管理自己的项目和Framework
+&amp;lt;/br&amp;gt;本文Demo&lt;a href=&quot;https://github.com/minsol/WorkSpace&quot;&gt;Demo地址&lt;/a&gt;
 &lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/framework.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
@@ -64,11 +65,11 @@
 &amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/LinkBinary.png&quot; alt=&quot;image&quot; /&gt;
 &amp;lt;/br&amp;gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&amp;lt;font color=red&amp;gt;注意：swift里面的Framework需要在target -&amp;gt; General -&amp;gt;Embedded Binaries 中添加这个framework&amp;lt;/font&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io&quot;&gt;swift—–打包自己的framework&lt;/a&gt;）
+&lt;p&gt;&amp;lt;font color=red&amp;gt;注意：swift里面的Framework需要在target -&amp;gt; General -&amp;gt;Embedded Binaries 中添加这个framework&amp;lt;/font&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io/2018/02/07/FrameWork/&quot;&gt;swift—–打包自己的framework&lt;/a&gt;）
 &amp;lt;/br&amp;gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/Embedded.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
 &lt;ol&gt;
   &lt;li&gt;为.a的静态库添加swift和OC的桥接文件
-&amp;lt;/br&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io&quot;&gt;Bridging-Header—–手动创建桥接文件&lt;/a&gt;）&lt;/li&gt;
+&amp;lt;/br&amp;gt;（详情参见之前文章&lt;a href=&quot;https://minsol.github.io/2018/02/07/Bridging-Header-2/&quot;&gt;Bridging-Header—–手动创建桥接文件&lt;/a&gt;）&lt;/li&gt;
   &lt;li&gt;在主工程中导入头文件Build&lt;/li&gt;
 &lt;/ol&gt;
 
@@ -76,6 +77,100 @@
         <pubDate>Wed, 07 Feb 2018 00:00:00 +0800</pubDate>
         <link>http://localhost:4000/2018/02/07/Workspace/</link>
         <guid isPermaLink="true">http://localhost:4000/2018/02/07/Workspace/</guid>
+        
+        <category>备忘录</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>iOS打包自己的framework</title>
+        <description>&lt;h3 id=&quot;前言&quot;&gt;前言&lt;/h3&gt;
+&lt;p&gt;本文记录在实际开发中打包自己的framework
+&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/framework.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;概念&quot;&gt;概念&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Framework是资源的集合，将静态库和其头文件包含到一个结构中:.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。&lt;code class=&quot;highlighter-rouge&quot;&gt;.a + .h + sourceFile = .framework。&lt;/code&gt;&lt;/li&gt;
+    &lt;li&gt;静态库：链接时，静态库会被完整地复制到可执行文件中，被多次使用就有多份冗余拷贝&lt;/li&gt;
+    &lt;li&gt;动态库：链接时不复制，程序运行时由系统动态加载到内存，供程序调用，系统只加载一次，多个程序共用，节省内存&lt;/li&gt;
+    &lt;li&gt;注意理解：无论是.a静态库还.framework静态库，我们需要的都是二进制文件+.h+其它资源文件的形式，不同的是，.a本身就是二进制文件，需要我们自己配上.h和其它文件才能使用，而.framework本身已经包含了.h和其它文件，可以直接使用。&lt;/li&gt;
+    &lt;li&gt;图片资源的处理：两种静态库，一般都是把图片文件单独的放在一个.bundle文件中，一般.bundle的名字和.a或.framework的名字相同。.bundle文件很好弄，新建一个文件夹，把它改名为.bundle就可以了，右键，显示包内容可以向其中添加图片资源。&lt;/li&gt;
+    &lt;li&gt;category是我们实际开发项目中经常用到的，把category打成静态库是没有问题的，但是在用这个静态库的工程中，调用category中的方法时会有找不到该方法的运行时错误（selector not recognized），解决办法是：在使用静态库的工程中配置other linker flags的值为-ObjC。&lt;/li&gt;
+    &lt;li&gt;如果一个静态库很复杂，需要暴露的.h比较多的话，就可以在静态库的内部创建一个.h文件（一般这个.h文件的名字和静态库的名字相同），然后把所有需要暴露出来的.h文件都集中放在这个.h文件中，而那些原本需要暴露的.h都不需要再暴露了，只需要把.h暴露出来就可以了。&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;一准备工作&quot;&gt;一：准备工作&lt;/h3&gt;
+&lt;h4 id=&quot;1创建一个cocoa-touch-framework的静态库&quot;&gt;1.创建一个Cocoa Touch FrameWork的静态库&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/workSpace/cocoaTouch.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;2创建一个swift的文件&quot;&gt;2.创建一个.swift的文件&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/FrameWork/FrameWork1.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;3属性和方法都需要使用public&quot;&gt;3.属性和方法都需要使用：public&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/FrameWork/FrameWork2.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;4选择需要暴露的头文件&quot;&gt;4.选择需要暴露的头文件&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/FrameWork/FrameWork3.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;5编译&quot;&gt;5.编译&lt;/h4&gt;
+
+&lt;h3 id=&quot;二使用&quot;&gt;二：使用&lt;/h3&gt;
+&lt;h4 id=&quot;1直接拖到其他工程里面可以使用&quot;&gt;1.直接拖到其他工程里面可以使用&lt;/h4&gt;
+&lt;p&gt;&amp;lt;font color=red&amp;gt;注意：有一点和oc的framework不同，这里需要在target -&amp;gt;General -&amp;gt;Embedded Binaries 中添加这个framework,添加成功后会自动在Linked Framework and Libraries中自动添加这个framework,如果只在Linked Framework and Libraries中添加这个framework会导致库无法载入（OC创建的framework应该是正常的），项目无法运行&amp;lt;/font&amp;gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Wed, 07 Feb 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/02/07/FrameWork/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/02/07/FrameWork/</guid>
+        
+        <category>备忘录</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>iOS_Swift中桥接头文件建立的两种方法</title>
+        <description>&lt;h3 id=&quot;前言&quot;&gt;前言&lt;/h3&gt;
+&lt;p&gt;本文记录在实际开发中桥接头文件建立的两种方法
+&amp;lt;/br&amp;gt;备注：swift环境
+***&lt;/p&gt;
+
+&lt;h3 id=&quot;方式一在swift环境下的工程里面还没有加入任何objective-c的文件时&quot;&gt;方式一：在swift环境下的工程里面还没有加入任何Objective-C的文件时&lt;/h3&gt;
+&lt;h4 id=&quot;直接创建一个objective-c的文件&quot;&gt;直接创建一个Objective-C的文件&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header1.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;方式二自己手动创建&quot;&gt;方式二：自己手动创建&lt;/h3&gt;
+&lt;h4 id=&quot;1创建一个header-file&quot;&gt;1.创建一个Header File&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header2.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;2路径选择targetsbuildsetting搜索header------project_dir项目名字bridging-headerh&quot;&gt;2.路径选择&lt;code class=&quot;highlighter-rouge&quot;&gt;TARGETS———BuildSetting———搜索header------$(PROJECT_DIR)/项目名字/Bridging-Header.h&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header3.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;3编译通过&quot;&gt;3.编译通过&lt;/h4&gt;
+
+&lt;h3 id=&quot;顺便记录一下objective-c下的pch的创建&quot;&gt;顺便记录一下Objective-C下的PCH的创建&lt;/h3&gt;
+&lt;h4 id=&quot;先说一下pch的作用&quot;&gt;先说一下pch的作用：&lt;/h4&gt;
+&lt;p&gt;预编译头文件(一般扩展名为.PCH),是把一个工程中较稳定的代码预先编译好放在一个文件(.PCH)里,它们在整个工程中是较为稳定的,即在工程开发过程中不会经常被修改的代码。在我的理解里是把一些宏定义（kScreenW等），一些要在多个类中使用的头文件在此文件中书写。简单来说，在.pch文件中定义的宏定义会作用到项目中的所有文件。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;存放一些全局的宏(整个项目中都用得上的宏)；&lt;/li&gt;
+    &lt;li&gt;用来包含一些全部的头文件(整个项目中都用得上的头文件)；&lt;/li&gt;
+    &lt;li&gt;能自动打开或者关闭日志输出功能。&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;实际操作&quot;&gt;实际操作：&lt;/h4&gt;
+&lt;h5 id=&quot;1创建一个header-file-1&quot;&gt;1.创建一个Header File&lt;/h5&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header4.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h5 id=&quot;2路径选择targetsbuildsetting搜索pch------project_dir项目名字bridging-headerh&quot;&gt;2.路径选择&lt;code class=&quot;highlighter-rouge&quot;&gt;TARGETS———BuildSetting———搜索pch------$(PROJECT_DIR)/项目名字/Bridging-Header.h&lt;/code&gt;&lt;/h5&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/Bridging-Header/Bridging-Header5.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;3编译通过-1&quot;&gt;3.编译通过&lt;/h4&gt;
+
+</description>
+        <pubDate>Wed, 07 Feb 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/02/07/Bridging-Header-2/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/02/07/Bridging-Header-2/</guid>
         
         <category>备忘录</category>
         
