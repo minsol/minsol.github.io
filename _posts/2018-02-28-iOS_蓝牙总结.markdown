@@ -1,0 +1,337 @@
+---
+layout:     post
+title:      "iOS蓝牙总结"
+subtitle:   "本文记录在实际开发中所用到相关蓝牙知识。"
+date:       2018-02-28
+author:     "minsol"
+header-img: "img/post-bg-universe.jpg"
+catalog: true
+tags:
+    - 备忘录
+---
+
+
+### 前言
+本文记录在实际开发中所用到相关蓝牙知识
+![bluetooth](https://raw.githubusercontent.com/minsol/MarkdownPhotos/master/Images/bluetooth/bluetooth.png)
+***
+###上架  Info.Plist
+`NSBluetoothPeripheralUsageDescription   App需要您的同意,才能访问蓝牙`
+
+### 概念
+>中心设备(CentralManager)：就是用来扫描周围蓝牙硬件的设备，比如通过你手机的蓝牙来扫描并连接智能手环，这时候你的手机就是中心设备。
+>
+>外设(Peripherals)：被扫描的设备。比如当你用手机的蓝牙扫描连接智能手环的时候，智能手环就是外设。
+>
+>广播：就是外设不停的散播蓝牙信号，让中心设备可以扫描到。
+>
+>服务（Services）：外设广播和运行的时候会有服务，可以理解成一个功能模块，中心设备可以读取服务。外设可以有多个服务。
+>
+>特征（Characteristic）：在服务中的一个单位，一个服务可以有多个特征，特征会有一个value，一般读写的数据就是这个value。
+>
+>UUID：区分不同的服务和特征，可以理解为服务和特征的身份证。我们可以用UUID来挑选需要的服务和特征。
+
+
+
+
+###蓝牙中心模式流程：
+>
+1. 创建 CBCentralManager 中心对象
+2. centralManager 扫描外设 discover
+`scanForPeripherals(withServices serviceUUIDs: [CBUUID]?, options: [String : Any]? = nil)`
+3. centralManager 连接外设（并设置为CBPeripheral的代理）
+`connect(_ peripheral: CBPeripheral, options: [String : Any]? = nil)`
+4. 用连接的外设发现服务
+`discoverServices(_ serviceUUIDs: [CBUUID]?)`
+5. 获取外设的特征 Characteristics
+`discoverCharacteristics(_ characteristicUUIDs: [CBUUID]?, for service: CBService)`
+6. 获取到外设的特征CBCharacteristic后,开始监听读的广播（一般一个读，一个写）
+`setNotifyValue(_ enabled: Bool, for characteristic: CBCharacteristic)`
+7. 广播获取的值会在代理方法里面回调
+`- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(nullable NSError *)error;`
+8. 写数据通过外设对特征进行写操作
+`writeValue(_ data: Data, for characteristic: CBCharacteristic, type: CBCharacteristicWriteType)`
+
+```swift
+//
+//  BluetoothAdaptor.swift
+//  JimuQX
+//
+//  Created by minsol on 2018/1/16.
+//  Copyright © 2018年 极目. All rights reserved.
+//
+
+import UIKit
+import CoreBluetooth
+
+final class BluetoothAdaptor: NSObject {
+    static let sharedInstance = BluetoothAdaptor()
+
+    fileprivate var centralManager: CBCentralManager?
+    
+    fileprivate let bleServiceUUID = CBUUID(string: "0000FFF9-0000-1000-8000-00805F9B34FB")
+    
+    fileprivate var blePeripheral: CBPeripheral?
+    fileprivate let jimuDeviceName = "jimu600"
+
+    /** 用于接收的特征*/
+    fileprivate var readCharacteristic: CBCharacteristic!
+    /** 用于发送的特征*/
+    fileprivate var writeCharacteristic: CBCharacteristic!
+
+    fileprivate let readCharacteristicUUID = CBUUID(string: "0000FFF1-0000-1000-8000-00805F9B34FB")
+    fileprivate let writeCharacteristicUUID = CBUUID(string: "0000FFF2-0000-1000-8000-00805F9B34FB")
+
+    var delegate : BleAdaptorMessageDelegate?
+    var isConnectedJmBle = false
+    @available(iOS 10.0, *)
+    var state : CBManagerState{
+        return centralManager!.state
+    }
+
+    
+    private override init() {
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: .UIApplicationWillEnterForeground, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: .UIApplicationDidEnterBackground, object: nil)
+        enterForeground()
+    }
+    
+    public func writeValue(_ data: Data){
+        blePeripheral?.writeValue(data, for: writeCharacteristic, type: CBCharacteristicWriteType.withResponse)
+    }
+    
+    @objc func enterForeground() {
+        startScan()
+    }
+
+    @objc func enterBackground() {
+        stopScan()
+    }
+
+    func startScan() {
+        if centralManager == nil {
+            centralManagerInit()
+        }
+        isConnectedJmBle = false
+        centralManager?.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey:true])
+    }
+
+    func stopScan() {
+        centralManager?.stopScan()
+    }
+}
+
+//MARK: - CBCentralManagerDelegate
+extension BluetoothAdaptor: CBCentralManagerDelegate {
+
+    fileprivate func centralManagerInit() {
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        print("central.state:::::::::\(central.state.rawValue)")
+        switch central.state {
+        case .poweredOn:
+            startScan()
+        default:
+            break;
+        }
+    }
+
+    ///扫描到外设之后会调用
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        guard let deviceName = advertisementData[CBAdvertisementDataLocalNameKey] as? String else {
+            return
+        }
+        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+            print("data:::::::::\(data)")
+        }
+        print("deviceName:::::::::\(deviceName)")
+        if deviceName == jimuDeviceName {
+            blePeripheral = peripheral
+            blePeripheral!.delegate = self
+            central.connect(peripheral, options: nil)
+        }
+    }
+
+    ///连接上外设之后会调用
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        print("blePeripheral:::::::::\(String(describing: blePeripheral))")
+        peripheral.discoverServices(nil)
+        stopScan()
+    }
+
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        print("didFailToConnect")
+    }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        isConnectedJmBle = false
+        print("didDisconnectPeripheral:\(String(describing: error))")
+    }
+}
+
+
+// MARK: /******************************CBPeripheralDelegate代理*****************************************/
+extension BluetoothAdaptor :CBPeripheralDelegate{
+
+    ///扫描此外设对应的服务之后调用
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        for service in peripheral.services! {
+            peripheral.discoverCharacteristics(nil, for: service)
+        }
+    }
+    
+    ///扫描此服务对应的特征之后调用
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        print("didDiscoverCharacteristicsFor service::::\(service.uuid)")
+        print(":::::::::\(String(describing: service.characteristics?.count))")
+        service.characteristics?.forEach { characteristic in
+            print("characteristic:\(characteristic.uuid)")
+            if characteristic.uuid == readCharacteristicUUID{
+                readCharacteristic = characteristic
+                peripheral.setNotifyValue(true, for: readCharacteristic)
+            }else if characteristic.uuid == writeCharacteristicUUID{
+                writeCharacteristic = characteristic
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        BleAdaptor.sharedInstance.semaphore.signal()
+        print("已经发送了给蓝牙:::::::::\(String(describing: characteristic.uuid))")
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        print("didUpdateValueFor:::::::::\(String(describing: characteristic.value))")
+        if let delegate = delegate {
+            delegate.didUpdateValueForCharacteristic(characteristic: characteristic, error: error)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        isConnectedJmBle = true
+        print("didUpdateNotificationStateFor:::::::::\(String(describing: characteristic.value))::::\(characteristic.uuid)")
+    }
+    
+    
+}
+
+```
+
+
+
+###蓝牙外设模式流程：
+>
+1. 创建 CBPeripheralManager 外设对象
+2. 创建服务和特征并添加到peripheralManager（一般开发中可以设置两个特征，一个用来发送数据，一个用来接收中心设备写过来的数据）
+`add(_ service: CBMutableService)`
+3. peripheralManager 根据服务的UUID开始广播
+`startAdvertising(_ advertisementData: [String : Any]?)`
+4. 当有中心设备订阅到特征后,在两个代理方法里面可以获取到中心设备的读和写的请求
+`读请求：- (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveReadRequest:(CBATTRequest *)request;
+`
+`写请求：- (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests;
+`
+5. 通过CBPeripheralManager主动给中心设备发送广播
+`updateValue(_ value: Data, for characteristic: CBMutableCharacteristic, onSubscribedCentrals centrals: [CBCentral]?) -> Bool`
+
+
+```swift
+
+import UIKit
+import CoreBluetooth
+
+private let Service_UUID: String = "CDD1"
+private let Characteristic_UUID: String = "CDD2"
+
+class ViewController: UIViewController {
+    
+    @IBOutlet weak var textField: UITextField!
+    private var peripheralManager: CBPeripheralManager?
+    private var characteristic: CBMutableCharacteristic?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "蓝牙外设"
+        peripheralManager = CBPeripheralManager.init(delegate: self, queue: .main)
+    }
+    
+    @IBAction func didClickPost(_ sender: Any) {
+        peripheralManager?.updateValue((textField.text ?? "empty data!").data(using: .utf8)!, for: characteristic!, onSubscribedCentrals: nil)
+    }
+}
+
+
+extension ViewController: CBPeripheralManagerDelegate {
+    
+    // 蓝牙状态
+    func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+        switch peripheral.state {
+        case .unknown:
+            print("未知的")
+        case .resetting:
+            print("重置中")
+        case .unsupported:
+            print("不支持")
+        case .unauthorized:
+            print("未验证")
+        case .poweredOff:
+            print("未启动")
+        case .poweredOn:
+            print("可用")
+            // 创建Service（服务）和Characteristics（特征）
+            setupServiceAndCharacteristics()
+            // 根据服务的UUID开始广播
+            self.peripheralManager?.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [CBUUID.init(string: Service_UUID)]])
+        }
+    }
+    
+    /** 创建服务和特征
+     注意swift中枚举的按位运算 '|' 要用[.read, .write, .notify]这种形式
+     */
+    private func setupServiceAndCharacteristics() {
+        let serviceID = CBUUID.init(string: Service_UUID)
+        let service = CBMutableService.init(type: serviceID, primary: true)
+        let characteristicID = CBUUID.init(string: Characteristic_UUID)
+        let characteristic = CBMutableCharacteristic.init(type: characteristicID,
+                                                          properties: [.read, .write, .notify],
+                                                          value: nil,
+                                                          permissions: [.readable, .writeable])
+        service.characteristics = [characteristic]
+        self.peripheralManager?.add(service)
+        self.characteristic = characteristic
+    }
+    
+    /** 中心设备读取数据的时候回调  CBPeripheral:readValue(for characteristic: CBCharacteristic) */
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        // 请求中的数据，这里把文本框中的数据发给中心设备
+        request.value = self.textField.text?.data(using: .utf8)
+        // 成功响应请求
+        peripheral.respond(to: request, withResult: .success)
+    }
+    
+    /** 获取到中心设备写入数据 CBPeripheral:writeValue(_ data: Data, for characteristic: CBCharacteristic, type: CBCharacteristicWriteType)*/
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        let request = requests.last!
+        self.textField.text = String.init(data: request.value!, encoding: String.Encoding.utf8)
+    }
+    
+    /** 订阅成功回调 */
+    func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+        print("\(#function) 订阅成功回调")
+    }
+    
+    /** 取消订阅回调 */
+    func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
+        print("\(#function) 取消订阅回调")
+    }
+    
+}
+
+
+
+
+```
+
