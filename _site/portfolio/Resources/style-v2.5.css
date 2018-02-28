@@ -178,10 +178,9 @@ a.button { display: inline-block; }
 		margin-left: 28px;
 		margin-right: 0;
 	}
-
+}
 	/* 空出页头位置 */
 	.main { padding-top: 71px; }
-}
 
 
 /* 章节 */
