@@ -11,36 +11,394 @@ tags:
 ---
 
 
-
 ### 前言
 在本文中只记录在实际应用中视频处理的简单使用，做以备忘。
 
 ### 针对本地视频的需求简介
 - [视频剪切](#视频剪切)
-- [视频快速播放](#视频快速播放)
-- [视频添加实时滤镜](#视频添加实时滤镜)
 - [视频叠加背景音乐](#视频叠加背景音乐)
 - [视频叠加水印](#视频叠加水印)
+  - [叠加静态水印-图片、动画](#叠加静态水印-图片、动画)
+  - [叠加动态水印-时间戳](#叠加动态水印-时间戳)
+- [读取视频帧方法](#读取视频帧方法)
+  - [读取视频帧方法一](#读取视频帧方法一)
+  - [读取视频帧方法二](#读取视频帧方法二)
+- [视频抽帧实现快速播放](#视频抽帧实现快速播放)
+- [视频添加实时滤镜](#视频添加实时滤镜)
+  - [使用GLKView显示](#使用GLKView显示)
+  - [使用MTKView显示](#使用MTKView显示)
 - [视频写入本地并导出到系统相册](#视频写入本地并导出到系统相册)
+- [获取视频帧图片](#获取视频帧图片)
+
 
 
 
 ##### 视频剪切
+1. 通过AVAsset创建AVAssetExportSession
+2. 设置输出地址，文件类型
+`AVAssetExportSession.outputURL
+AVAssetExportSession.outputFileType = AVFileTypeQuickTimeMovie`
+3. 设置AVAssetExportSession.timeRange裁剪范围:
+`AVAssetExportSession.timeRange = CMTimeRangeMake()`
+4. 导出`AVAssetExportSession.exportAsynchronously`
 
-##### 视频快速播放
-
-##### 视频添加实时滤镜
+```swift
+    // MARK: -  剪切视频
+    private func aVAssetTrimVideo(asset:AVAsset,startTime:CGFloat,stopTime:CGFloat,completionHandler:@escaping (Bool) -> Swift.Void){
+        checkForAndDeleteFile()
+        let compatiblePresets = AVAssetExportSession.exportPresets(compatibleWith: asset)
+        if compatiblePresets.contains(AVAssetExportPresetMediumQuality){
+            assetExport = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough)
+            assetExport.outputURL = exportURL
+            assetExport.outputFileType = AVFileTypeQuickTimeMovie
+            let start = CMTimeMakeWithSeconds(Float64(startTime), asset.duration.timescale)
+            let duration = CMTimeMakeWithSeconds(Float64(stopTime - startTime),asset.duration.timescale)
+            let range = CMTimeRangeMake(start, duration)
+            assetExport.timeRange = range
+            assetExport.exportAsynchronously(completionHandler: {
+                switch self.assetExport.status{
+                case .failed:
+                    completionHandler(false)
+                case .cancelled:
+                    completionHandler(false)
+                case .completed:
+                    completionHandler(true)
+                default:
+                    break
+                }
+            })
+        }
+    }
+```
 
 ##### 视频叠加背景音乐
+>对视频资源里面的音轨个视频轨道提取出来重新合并导出
+>
+1. 通过AVURLAsset，拿到视频和音频资源
+2. 创建AVMutableComposition对象
+3. 往AVMutableComposition对象添加视频资源对象，同时设置视频资源的时间段和插入点
+4. 通过AVURLAsset的tracks得到AVMediaTypeVideo类型的轨道
+5. 往AVMutableComposition对象添加要追加的视频资源轨道，同时设置视频资源的时间段，插入点和混合模式
+6. 往AVMutableComposition对象添加音频资源，同时设置音频资源的时间段和插入点
+7. 通过AVURLAsset的tracks得到AVMediaTypeAudio类型的轨道
+8. 往AVMutableComposition对象添加要追加的音频资源轨道，同时设置音频资源的时间段，插入点和混合模式
+9. 通过AVAssetExportSession，导出AVMutableComposition对象到本地
+
+```swift
+    private func composite(videoUrl: URL, audioUrl: URL, outputURL: URL, completionHandler: @escaping () -> Swift.Void) {
+        let videoAsset = AVAsset(url: videoUrl)
+        let audioAsset = AVAsset(url: audioUrl)
+        let duration = videoAsset.duration
+        let timeStart = kCMTimeZero
+        let timeRange = CMTimeRange(start: timeStart, duration: duration)
+
+        let composition = AVMutableComposition()
+        let videoTrack = composition.addMutableTrack(withMediaType: AVMediaTypeVideo, preferredTrackID: kCMPersistentTrackID_Invalid)
+        try? videoTrack.insertTimeRange(timeRange, of: videoAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: timeStart)
+        let audioTrack = composition.addMutableTrack(withMediaType: AVMediaTypeAudio, preferredTrackID: kCMPersistentTrackID_Invalid)
+        try? audioTrack.insertTimeRange(timeRange, of: audioAsset.tracks(withMediaType: AVMediaTypeAudio)[0], at: timeStart)
+
+        let assetExport = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough)!
+
+        assetExport.outputFileType = AVFileTypeMPEG4
+        assetExport.outputURL = outputURL
+        assetExport.exportAsynchronously {
+            completionHandler()
+        }
+    }
+```
 
 ##### 视频叠加水印
-
-##### 视频写入本地并导出到系统相册
-
-
-
-
+###### 叠加静态水印-图片、动画
+>使用AVAssetExportSession.videoComposition.animationTool工具
 
 ```swift
 
 ```
+
+###### 叠加动态水印-时间戳
+>使用AVAssetReader手动一帧一帧图片添加
+>
+>视频开始时间+`CMSampleBufferGetPresentationTimeStamp(sampleBuffer)`，然后绘制。
+
+```swift
+1.let sampleBuffer = AVAssetReaderTrackOutput.copyNextSampleBuffer()//得到当前视频帧：CMSampleBuffer
+2.var currentTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).timestamp//得到当前视频帧的时间：CMTime
+3.currentTime += file.start_timestamp//加上视频开始时间得到对于时间戳
+4.let timeText = "\(currentTime.toDate.toString)" as NSString//转换时间戳未字符串
+5.var srcImage = CIImage(cvImageBuffer: imageBuffer)//得到视频帧里面的图像信息：CVImageBuffer
+6.let adasImage = self.createFcwImage(size: srcImage.extent.size, timeText: timeText)//创建一个CGImage上面绘制的时间戳
+7.let outImage = CIImage(cgImage: adasImage).compositingOverImage(srcImage)//图片合成CIImage
+8.CIContext().render(outImage, to: imageBuffer)//绘制CIImage到CVPixelBuffer
+9.AVAssetWriterInput.append(sampleBuffer)//写入带有时间戳的视频帧信息
+
+
+public typealias CVPixelBuffer = CVImageBuffer
+public typealias CVImageBuffer = CVBuffer
+
+
+fileprivate func createFcwImage(size: CGSize, timeText: NSString?) ->CGImage {
+        UIGraphicsBeginImageContext(size)
+        let context = UIGraphicsGetCurrentContext()!
+        //日期水印
+        timeText?.drawTimeLabel(in: context)
+        let cgImage = context.makeImage()!
+        UIGraphicsEndImageContext()
+        return cgImage
+}
+    
+extension NSString {
+    func drawTimeLabel(in context: CGContext) {
+        let size = CGSize(width: context.width, height: context.height)
+        let textHeight = size.height / 32
+        let textShadowLen = size.height / 540
+
+        let textShadow = NSShadow()
+        textShadow.shadowOffset = CGSize(width: 0, height: -textShadowLen)
+        textShadow.shadowColor = UIColor(white: 0, alpha: 0.3)
+        self.draw(at: CGPoint(x: textHeight * 0.5, y: size.height - textHeight * 1.5),
+                      withAttributes: [NSFontAttributeName: UIFont.systemFont(ofSize: textHeight),
+                                       NSForegroundColorAttributeName: UIColor.white,
+                                       NSShadowAttributeName: textShadow,
+                                       NSVerticalGlyphFormAttributeName: 0])
+    }
+}
+```
+
+
+##### 读取视频帧方法
+###### 读取视频帧方法一（得到:CMSampleBuffer）
+>通过AVAssetReader，添加一个AVAssetReaderTrackOutput获取
+>
+>AVAssetReader可以从AVAsset资源读取资源原始数据里获取解码后的音视频数据。
+结合AVAssetReaderTrackOutput（输出端口，继承AVAssetReaderOutput），能读取一帧帧的CMSampleBufferRef。
+
+1. 创建AVURLAsset获取资源
+2. 创建一个AVAssetReader：读数据
+3. 创建一个视频轨道输出：AVAssetReaderTrackOutput，获取当前视频轨道
+4. 创建一个音频轨道输出：AVAssetReaderTrackOutput，获取当前音频轨道
+5. 将音视频轨道输出添加到读取器：`AVAssetReader.add(_ output: AVAssetReaderOutput)`
+6. 读取器AVAssetReader开始读取视频 : `AVAssetReader?.startReading()`
+7. 通过音视频轨道输出获取CMSampleBuffer :`AVAssetReaderTrackOutput.copyNextSampleBuffer()`
+
+```swift
+
+
+```
+
+###### 读取视频帧方法二（得到:CVPixelBuffer）
+>通过AVPlayer播放视频添加一个输出流AVPlayerItemVideoOutput。
+>
+>首先，我们获取当前的时间，并且将它转换成AVPlayer当前播放项目里的时间比，然后我们询问 AVPlayerItemVideoOutput，如果当前时间有一个可用的新的像素缓存区，我们把它回调回去
+
+1. 创建AVPlayer用来播放当前的本地视频
+2. 创建AVPlayerItemVideoOutput（视频输出流）
+3. 将输出流添加到AVPlayer：得到当前播放视频的输出`AVPlayer.currentItem?.add(AVPlayerItemVideoOutput)`
+4. 播放当前视频：`AVPlayer.play()`
+5. 创建一个CADisplayLink：用来刷新每一帧视频回调CVPixelBuffer
+`displayLink = CADisplayLink(target: self, selector: #selector(displayLinkDidRefresh(_:)))
+displayLink?.add(to: RunLoop.main, forMode: RunLoopMode.commonModes)//不卡帧`
+6. 刷新视频帧核心代码(AVPlayerItemVideoOutput的方法)
+    >1.获取当前的时间，并且将它转换成当前播放项目里的时间比
+    `let itemTime = AVPlayerItemVideoOutput.itemTime(forHostTime: CACurrentMediaTime())`
+    
+    >2.判断是否有新的像素缓存区
+    `AVPlayerItemVideoOutput.hasNewPixelBuffer(forItemTime: itemTime)`
+    
+    >3.复制当前CVPixelBuffer回调回去
+    `var presentationItemTime = kCMTimeZero`
+    `AVPlayerItemVideoOutput.copyPixelBuffer(forItemTime: itemTime, itemTimeForDisplay: &presentationItemTime)`
+
+```swift
+
+
+```
+
+##### 视频抽帧实现快速播放
+>读取视帧数据后，通过压缩比率对帧数据进行处理压缩，然后重新存储到本地
+
+
+##### 视频添加实时滤镜
+>通过上面读取视频帧方法二得到CVPixelBuffer，然后通过CoreImage里面的CIFilter对一帧视频添加滤镜后渲染视图
+
+>>CMSampleBuffer ->CVPixelBuffer -> CIImage -> 添加滤镜 -> CIImage -> GLKView上显示
+>>
+>>CMSampleBuffer -> CVPixelBuffer -> CIImage -> 添加滤镜 -> CIImage -> CGImage -> 渲染到CALayer上显示
+
+###### 使用GLKView显示
+
+```swift
+//创建一个子类CoreImageView继承GLKView
+import Foundation
+import GLKit
+
+class CoreImageView: GLKView {
+    
+    var image: CIImage? {
+        didSet {
+            display()
+        }
+    }
+    let coreImageContext: CIContext
+    
+    override convenience init(frame: CGRect) {
+        let eaglContext = EAGLContext(api: EAGLRenderingAPI.openGLES2)
+        self.init(frame: frame, context: eaglContext!)
+    }
+    
+    override init(frame: CGRect, context eaglContext: EAGLContext) {
+        coreImageContext = CIContext(eaglContext: eaglContext)
+        super.init(frame: frame, context: eaglContext)
+        // We will be calling display() directly, hence this needs to be false
+        enableSetNeedsDisplay = false
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func draw(_ rect: CGRect) {
+        if let img = image {
+            let scale = self.window?.screen.scale ?? 1.0
+            let destRect = bounds.applying(CGAffineTransform(scaleX: scale, y: scale))
+            coreImageContext.draw(img, in: destRect, from: img.extent)
+        }
+    }
+}
+
+//使用
+coreImageView = CoreImageView(frame:)
+playBGVIew.insertSubview(coreImageView!, at: 0)
+coreImageView.image = CIImage()
+```
+
+###### 使用MTKView显示
+```swift
+//创建MTKView，设置代理，在代理方法中提交Buffer
+extension VideoEditViewController: MTKViewDelegate {
+    func mtkViewInit() {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            return
+        }
+        let mtkView = MTKView(frame: videoBgView.bounds, device: device)
+        mtkView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin, .flexibleWidth, .flexibleHeight]
+        videoBgView.insertSubview(mtkView, at: 0)
+        mtkView.framebufferOnly = false
+        mtkView.preferredFramesPerSecond = 30
+        mtkView.delegate = self
+    }
+
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+
+    }
+
+    func draw(in view: MTKView) {
+        guard let videoOutput = videoOutput else {
+            return
+        }
+        let itemTime = videoOutput.itemTime(forHostTime: CACurrentMediaTime() + 0.5)
+        if videoOutput.hasNewPixelBuffer(forItemTime: itemTime) {
+            if let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: itemTime, itemTimeForDisplay: nil) {
+                let srcImage = CIImage(cvPixelBuffer: pixelBuffer)
+                
+                let commandQueue = view.device!.makeCommandQueue()
+                let commandBuffer = commandQueue.makeCommandBuffer()
+                CIContext().render(srcImage, to: view.currentDrawable!.texture, commandBuffer: commandBuffer, bounds: srcImage.extent, colorSpace: colorSpace)
+                commandBuffer.present(view.currentDrawable!)
+                commandBuffer.commit()
+            }
+        }
+    }
+}
+```
+
+
+##### 视频写入本地并导出到系统相册
+
+###### 在系统相册中创建APP名称的相册
+```swift
+    fileprivate let phAssetTitle = "极目知行".Localizable()
+    fileprivate var jmCollection: PHAssetCollection?
+    
+    //MARK: 系统相册
+    fileprivate func findJMCollection() -> PHAssetCollection? {
+        if jmCollection == nil {
+            let collections = PHAssetCollection.fetchAssetCollections(with: PHAssetCollectionType.album, subtype: PHAssetCollectionSubtype.albumRegular, options: nil)
+            collections.enumerateObjects({
+                if let title = $0.0.localizedTitle {
+                    if title == self.phAssetTitle {
+                        self.jmCollection = $0.0
+                    }
+                }
+            })
+        }
+        
+        if jmCollection == nil {
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: self.phAssetTitle)
+            }, completionHandler: nil)
+        }
+        return jmCollection
+    }
+```
+
+```swift
+    //将照片保存到照片库中
+    func saveImageToJMCollection(filePath: String, completionHandler: ((Bool, Error?) -> Swift.Void)? = nil) {
+        
+        guard let jmCollection = findJMCollection() else {
+            return
+        }
+        guard #available(iOS 9.0, *) else {
+            return
+        }
+        PHPhotoLibrary.shared().performChanges({
+            if let placeholder = PHAssetCreationRequest.creationRequestForAssetFromImage(atFileURL: URL(fileURLWithPath: filePath))?.placeholderForCreatedAsset {
+                PHAssetCollectionChangeRequest(for: jmCollection)?.addAssets([placeholder] as NSFastEnumeration)
+            }
+        }, completionHandler: completionHandler)
+    }
+    
+    
+    
+    //将录制好的录像保存到照片库中
+    public func saveVideoToJMCollection(filePath: String, completionHandler: ((Bool, Error?) -> Swift.Void)? = nil) {
+            let fileUrl = URL(fileURLWithPath: filePath)
+            //视频转码导出
+            MediaManagerController.sharedInstance.exportVideoToLoacl(videoAsset: AVAsset(url: fileUrl)) { (finish) in
+                if finish{
+                        guard let jmCollection = self.findJMCollection() else {
+                            if let handler = completionHandler {
+                                handler(false, "未开启相册权限" as? Error)
+                            }
+                            return
+                        }
+                        guard #available(iOS 9.0, *) else {
+                            UISaveVideoAtPathToSavedPhotosAlbum(self.editorTempVideoPath, self, nil, nil)
+                            return
+                        }
+                        PHPhotoLibrary.shared().performChanges({
+                            if let placeholder = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL:URL(fileURLWithPath: self.editorTempVideoPath))?.placeholderForCreatedAsset {
+                                PHAssetCollectionChangeRequest(for: jmCollection)?.addAssets([placeholder] as NSFastEnumeration)
+                            }
+                        }, completionHandler:completionHandler)
+                    }
+            }
+        }
+```
+
+
+##### 获取视频帧图片
+>通过VAssetImageGenerator获取视频里面的帧图片
+
+1. 通过URL获取video资源AVURLAsset
+2. 通过AVURLAsset创建AVAssetImageGenerator
+3. `AVAssetImageGenerator.generateCGImagesAsynchronously(forTimes requestedTimes: [NSValue], completionHandler handler: @escaping AVFoundation.AVAssetImageGeneratorCompletionHandler)`
+参数：forTimes：取多少张图片
+回调：AVAssetImageGeneratorCompletionHandler = (CMTime, CGImage?, CMTime, AVAssetImageGeneratorResult, Error?) -> Swift.Void
+第一个CMTime：requestedTime
+第二个CMTime：actualTime
+
+
+
+
