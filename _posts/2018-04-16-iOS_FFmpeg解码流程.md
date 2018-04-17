@@ -19,13 +19,9 @@ tags:
 
 ### 准备工作
 >1. 注册所有容器格式和CODEC:`avcodec_register_all();`
-
 >2. 查找对应的解码器AVCodec:`AVCodec *h264Codec = avcodec_find_decoder(AV_CODEC_ID_H264);`
-
 >3. 通过解码器创建相应的AVCodecContext:`avcodec_alloc_context3(h264Codec);`
-
 >4. 打开编解码器:`avcodec_open2(_h264Ctx, h264Codec, NULL);`
-
 >5. 创建包含码流参数的AVFrame:`avframe = av_frame_alloc();`
 
 ```swift
