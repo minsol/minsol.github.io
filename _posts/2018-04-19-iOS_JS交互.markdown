@@ -1,0 +1,142 @@
+---
+layout:     post
+title:      "iOS-iOS与H5之间的交互"
+subtitle:   "在本文中只记录在实际应用中iOS与H5之间的交互，做以备忘。"
+date:       2018-04-19
+author:     "minsol"
+header-img: "img/post-bg-universe.jpg"
+catalog: true
+tags:
+    - 备忘录
+---
+
+
+### 前言
+在本文中只记录在实际应用中iOS与H5之间的交互，做以备忘。
+
+### 一、javaScript调用OC
+```
+#import <JavaScriptCore/JavaScriptCore.h>
+1）在webViewDidFinishLoad这个代理方法里面
+    //1.对JSContext对象进行初始化
+    self.context = [webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+    //2.验证JSContext对象是否初始化成功
+     self.context.exceptionHandler = ^(JSContext *context, JSValue *exceptionValue)
+    {
+        context.exception = exceptionValue;
+        NSLog(@"%@", exceptionValue);
+    };
+
+```
+
+```
+//上一个模块我们已经对JSContext对象进行了初始化,那么要使用JavaScript调取OC代码主要有两种方式,  
+//一种是使用block(简单粗暴);
+//另外一种是使用JSExport协议(决胜千里).
+
+2）//方法一：使用block
+    1.在代理方法：webViewDidFinishLoad里面
+    __weak typeof(self)temp = self;
+    self.context[@"myAction"] = ^(NSString*str){
+       NSLog(@"%@",str);
+      //实现事件        
+    };
+    
+    
+self.context[@"log"] = ^(NSString*string){       
+        NSLog(@"%@",string);
+        //实现事件
+};
+
+
+P:对应HTML（都是作为对应方法的参数传过来的）
+<button onclick="myAction('hello');" style="">点击按钮返回上一个页面</button>
+<button onclick="log(document.getElementById('textField').value);">打印输入框信息</button>
+```
+```
+3）//方法二：JSExport协议
+
+1.使用方法二之前先声明协议：在VC.h里面
+@protocol WebExport <JSExport>
+
+/*
+SExportAs(PropertyName,Selector)这个宏定义做一下解释, 也就说在PropertyName代表着JS函数的名称,而Selector代表着OC的协议方法, 要注意的是Selector必须要有参数,不管是否需要传值.
+ */
+
+
+////将JS的myLog和我们myOCLog方法绑定在一起
+JSExportAs
+(myLog , - (void)myOCLog :(NSString*)string);
+
+2.然后在实现方法
+- (void)myOCLog :(NSString*)string{   
+NSLog(@"你好,世界!");
+}
+
+3.在代理方法：webViewDidFinishLoad里面
+//方法二：我们需要把native对象指定为当前控制器
+self.context[@"native"] = self;
+
+P:对应HTMl中的方法
+<button onclick="native.myLog();">调用OC中myLog方法</button>
+```
+### 二、OC调用javaScript（html中嵌入的js）
+```
+1）在webViewDidFinishLoad这个代理方法里面
+    //1.对JSContext对象进行初始化
+    self.context = [webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+    //2.验证JSContext对象是否初始化成功
+     self.context.exceptionHandler = ^(JSContext *context, JSValue *exceptionValue)
+    {
+        context.exception = exceptionValue;
+    };
+```
+
+```
+/*
+首先我们要先通过JSContext对象获取到JS中的对应函数并且使用JSValue对象进行接收. 然后我们通过使用- (JSValue *)callWithArguments:(NSArray *)arguments;进行JS函数的调用,当然了这里的JS函数没有返回值,我也就没有做接收返回值的工作.
+ */
+
+-(void)OC的点击事件：直接调用js的方法把参数带过去{
+   
+//方法一：
+//    JSValue *labelAction = self.context[@"labelAction"];
+//    [labelAction callWithArguments:@[@"你好,JS世界!"]];
+
+ 
+JSValue *function = self.context[@"factorial"];//    JSValue *function = [self.context objectForKeyedSubscript:@"factorial”]
+JSValue *result = [function callWithArguments:@[inputNumber]];   
+
+//方法二：
+[self.webView stringByEvaluatingJavaScriptFromString:@"labelAction('minsol')”];
+}
+
+
+P:对应HTML的方法
+<script type="text/javascript">
+function labelAction(obj) {
+document.getElementById('label').innerHTML = obj;
+}
+</script>
+```
+
+
+### 三、WKWebView:加载之前就加载脚本
+```swift
+        var js = "var no = document.getElementById('no');no.value = '"
+        js+=cardNo
+        js+= "';var mob = document.getElementById('mob');mob.value = '"
+        js+=mobNo
+        js+= "';"
+        let script = WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        let config = WKWebViewConfiguration()
+        config.userContentController.addUserScript(script)
+        let webView = WKWebView(frame: view.bounds, configuration: config)
+```
+
+### 四、WKWebView:调用JS的方法
+```swift
+ webView.evaluateJavaScript(String) { (Any?, Error?) in
+            code
+    }
+```
