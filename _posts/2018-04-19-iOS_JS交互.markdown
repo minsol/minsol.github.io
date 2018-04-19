@@ -14,7 +14,7 @@ tags:
 ### 前言
 在本文中只记录在实际应用中iOS与H5之间的交互，做以备忘。
 
-### 一、javaScript调用OC
+### 一、JavaScript调用OC
 ```
 #import <JavaScriptCore/JavaScriptCore.h>
 1）在webViewDidFinishLoad这个代理方法里面
