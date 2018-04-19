@@ -14,7 +14,8 @@ tags:
 ### 前言
 在本文中只记录在实际应用中iOS与H5之间的交互，做以备忘。
 
-### 一、JavaScript调用OC
+### 一、UIWebView
+#### 1、JavaScript调用OC
 ```
 #import <JavaScriptCore/JavaScriptCore.h>
 1）在webViewDidFinishLoad这个代理方法里面
@@ -80,7 +81,7 @@ self.context[@"native"] = self;
 P:对应HTMl中的方法
 <button onclick="native.myLog();">调用OC中myLog方法</button>
 ```
-### 二、OC调用javaScript（html中嵌入的js）
+#### 2、OC调用javaScript（html中嵌入的js）
 ```
 1）在webViewDidFinishLoad这个代理方法里面
     //1.对JSContext对象进行初始化
@@ -120,8 +121,52 @@ document.getElementById('label').innerHTML = obj;
 </script>
 ```
 
+### 二、WKWebView
+#### 1.调用顺序
+```
+// 在发送请求之前，决定是否跳转====1======66666
+(// 类似 UIWebView 的 -webView: shouldStartLoadWithRequest: navigationType:)
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    NSLog(@"%@",navigationAction.request.URL.absoluteString);
+    //允许跳转
+    decisionHandler(WKNavigationActionPolicyAllow);
+    //不允许跳转
+    //decisionHandler(WKNavigationActionPolicyCancel);
+}
+// 页面开始加载时调用===2
+(// 类似UIWebView的 -webViewDidStartLoad:)
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
+    NSString *urlString = [webView.URL absoluteString];
+    urlString = [urlString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    //    NSLog(@"%@",urlString);
+}
+// 在收到响应后，决定是否跳转=====3
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler{
+    //    NSLog(@"%@",navigationResponse.response.URL.absoluteString);
+    //允许跳转
+    decisionHandler(WKNavigationResponsePolicyAllow);
+    //不允许跳转
+    //    decisionHandler(WKNavigationResponsePolicyCancel);
+}
+// 当内容开始返回时调用====4
+- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation{
+    NSString *urlString = [webView.URL absoluteString];
+    urlString = [urlString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    //    NSLog(@"%@",urlString);
+}
+////页面加载完成之后调用========55555
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
 
-### 三、WKWebView:加载之前就加载脚本
+}
+// 接收到服务器跳转请求之后调用
+- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation{
+    NSString *urlString = [webView.URL absoluteString];
+    urlString = [urlString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    //    NSLog(@"%@",urlString);
+}
+
+```
+#### 2、WKWebView:加载之前就加载脚本
 ```swift
         var js = "var no = document.getElementById('no');no.value = '"
         js+=cardNo
@@ -133,10 +178,29 @@ document.getElementById('label').innerHTML = obj;
         config.userContentController.addUserScript(script)
         let webView = WKWebView(frame: view.bounds, configuration: config)
 ```
+```
+// 图片缩放的js代码
+NSString *js = @"var count = document.images.length;for (var i = 0; i < count; i++) {var image = document.images[i];image.style.width=320;};window.alert('找到' + count + '张图');";
+// 根据JS字符串初始化WKUserScript对象
+WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+// 根据生成的WKUserScript对象，初始化WKWebViewConfiguration
+WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+[config.userContentController addUserScript:script];
+_webView = [[WKWebView alloc] initWithFrame:self.view.bounds configuration:config];
+[_webView loadHTMLString:@"<head></head><imgea src='http://www.nsu.edu.cn/v/2014v3/img/background/3.jpg' />"baseURL:nil];
+[self.view addSubview:_webView];
+```
 
-### 四、WKWebView:调用JS的方法
+#### 3、WKWebView:OC调用JS的方法
 ```swift
  webView.evaluateJavaScript(String) { (Any?, Error?) in
             code
     }
+```
+#### 3、WKWebView:JS调用OC
+```
+#pragma mark - WKScriptMessageHandler
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message{
+    NSLog(@"name:%@\\\\n body:%@\\\\n frameInfo:%@\\\\n",message.name,message.body,message.frameInfo);
+}
 ```
