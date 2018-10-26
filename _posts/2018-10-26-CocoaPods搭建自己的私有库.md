@@ -114,8 +114,11 @@ tags:
 
 ![](https://github.com/minsol/MarkdownPhotos/blob/master/Images/CocoaPods/CocoaPodsSpec3.png?raw=true)
 
-6.  ```每次更新完源代码后，更改podspec的version。然后继续验证步骤4和步骤5.(注意文件路径)```
+6.  每次更新完源代码后，更改podspec的version。然后继续验证步骤4和步骤5.(注意文件路径)
+
+
 ### 使用
+
 1. 新建工程在工程的根目录创建Podfile文件（other－>empty名字叫Podfile）
 ```
 source 'https://github.com/CocoaPods/Specs.git'  # 官方库
@@ -139,7 +142,9 @@ end
 ### 备注
 #### .podspec文件参数解释
 [.podspec文件参数解释](https://guides.cocoapods.org/syntax/podspec.html#vendored_libraries)
+
 #### pod常用命令
+
 ```
 //查看本地repos路径
 ~/.cocoapods/repos
