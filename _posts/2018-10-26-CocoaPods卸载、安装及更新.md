@@ -7,7 +7,7 @@ author:     "minsol"
 header-img: "img/post-bg-universe.jpg"
 catalog: true
 tags:
-    - 工具介绍
+    - iOS开发记录
 ---
 ### CocoaPods介绍
 #### CocoaPods 是开发 OS X 和 iOS 应用程序的一个第三方库的依赖管理工具，而其本身是利用 ruby 的依赖管理 gem 进行构建的。
