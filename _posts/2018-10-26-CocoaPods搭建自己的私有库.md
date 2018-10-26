@@ -118,6 +118,7 @@ tags:
 ### 使用
 
 1. 新建工程在工程的根目录创建Podfile文件（other－>empty名字叫Podfile）
+
     ```
     source 'https://github.com/CocoaPods/Specs.git'  # 官方库
     source 'https://github.com/minsol/MinsolSpec.git'   # 自己私有库
