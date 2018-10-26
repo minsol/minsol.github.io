@@ -81,16 +81,15 @@ tags:
       # 注意：不同子文件夹下 source_files 中的文件是单独编译的，如果文件中引入了别的子文件夹下的代码是编译不通过的。
   end
 ```
-
-   > 文件匹配
-   > - *匹配所有文件
-   > - c*匹配以名字C开头的文件
-   > - *c匹配以名字c结尾的文件
-   > - *c*匹配所有名字包含c的文件
-   > - **文件夹以及递归子文件夹
-   > - ?任意一个字符(注意是一个字符)
-   > - [set] 匹配多个字符,支持取反
-   > - {p,q} 匹配名字包括p 或者 q的文件
+        > 文件匹配
+        > - *匹配所有文件
+        > - c*匹配以名字C开头的文件
+        > - *c匹配以名字c结尾的文件
+        > - *c*匹配所有名字包含c的文件
+        > - **文件夹以及递归子文件夹
+        > - ?任意一个字符(注意是一个字符)
+        > - [set] 匹配多个字符,支持取反
+        > - {p,q} 匹配名字包括p 或者 q的文件
 
 3. 验证.podspec的有效性
 
@@ -110,9 +109,9 @@ tags:
     MinsolSpec:本地私有库文件夹名字。<br>
     此时会发现本地MinsolSpec文件夹下多了TestLib文件夹，并且已经同步到自己的远程仓库。
 
-![](https://github.com/minsol/MarkdownPhotos/blob/master/Images/CocoaPods/CocoaPodsSpec4.png?raw=true)
+    ![](https://github.com/minsol/MarkdownPhotos/blob/master/Images/CocoaPods/CocoaPodsSpec4.png?raw=true)
 
-![](https://github.com/minsol/MarkdownPhotos/blob/master/Images/CocoaPods/CocoaPodsSpec3.png?raw=true)
+    ![](https://github.com/minsol/MarkdownPhotos/blob/master/Images/CocoaPods/CocoaPodsSpec3.png?raw=true)
 
 6.  每次更新完源代码后，更改podspec的version。然后继续验证步骤4和步骤5.(注意文件路径)
 
