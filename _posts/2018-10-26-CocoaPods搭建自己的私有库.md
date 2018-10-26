@@ -126,16 +126,16 @@ tags:
     target 'demo' do
 
     # Pods for demo
-        pod 'TestLib'
-        pod 'YDTAppPrivate'
-        pod 'YDTAdvertising', :path => "/Users/minsol/Desktop/YDTAdvertising"#本地验证
-    end
+        # pod 'TestLib'
+        # pod 'YDTAppPrivate'
+        # pod 'YDTAdvertising', :path => "/Users/minsol/Desktop/YDTAdvertising"#本地验证
+    # end
     ```
-2. 安装
-    >```pod install --verbose --no-repo-update```
+2. 安装<br>
+    ```pod install --verbose --no-repo-update```
     
-3. 更新
-    >```pod update --verbose --no-repo-update```
+3. 更新<br>
+    ```pod update --verbose --no-repo-update```
 
 ### 备注
 #### .podspec文件参数解释
