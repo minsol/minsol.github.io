@@ -7,7 +7,7 @@ author:     "minsol"
 header-img: "img/post-bg-universe.jpg"
 catalog: true
 tags:
-    - 备忘录
+    - 工具介绍
 ---
 
 ## 印象猿
