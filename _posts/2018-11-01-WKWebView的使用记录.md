@@ -80,10 +80,7 @@ window.webkit.messageHandlers.Client.postMessage({
     @property (nonatomic, weak) id <WKScriptMessageHandler> delegate;
     - (instancetype)initWithDelegate:(id <WKScriptMessageHandler>)delegate;
     @end
-```
-<br>
-
-```objc
+----------------------------------------------------------------------------
     GPWKWebViewDelegate.m
     #import "GPWKWebViewDelegate.h"
     @interface GPWKWebViewDelegate ()
